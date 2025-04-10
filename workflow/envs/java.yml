@@ -1,0 +1,5 @@
+name: java_env
+channels:
+  - conda-forge
+dependencies:
+  - openjdk=8.*

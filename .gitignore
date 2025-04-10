@@ -1,0 +1,5 @@
+.snakemake
+analysis
+refs
+data
+workflow/software/vep

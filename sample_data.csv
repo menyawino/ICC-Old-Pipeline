@@ -1,0 +1,3 @@
+sample,lane,read,file,condition
+20BH06185_S1,L001,R1,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/20BH06185/20BH06185_S1_L001_R1_001.fastq,healthy
+20BH06185_S1,L001,R2,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/20BH06185/20BH06185_S1_L001_R2_001.fastq,healthy

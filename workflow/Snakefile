@@ -1,0 +1,57 @@
+############################
+####### Loading data #######
+############################
+
+# import necessary modules to process sample data
+from scripts.sample_processing import *
+import os
+import subprocess
+
+# add sample file here
+samplesfile = "/mnt/omar/pipelines/icc/old_pipeline/workflow/samples.csv"
+
+# get input directory
+configfile: "workflow/config.yml"
+inputdir = config["inputdir"]
+
+# get sample data
+samples_data = get_sample_data(samplesfile, inputdir)
+
+
+# prepare wildcards
+sample_mrn = samples_data['sample'].unique().tolist()
+sample_mrn = [x.split('_')[0] for x in sample_mrn]
+lane = samples_data['lane'].unique().tolist()
+read = samples_data['read'].unique().tolist()
+sample_filename = samples_data['sample'].unique().tolist()
+sample_filename = [f"{x}/{y}" for x, y in zip(sample_mrn, sample_filename)]
+caller = ['haplotype_caller', 'unified_genotyper']
+variant_type = ['snp', 'indel']
+
+wildcard_constraints:
+    sample_mrn= '|'.join([re.escape(x) for x in sample_mrn]),
+    lane= '|'.join([re.escape(x) for x in lane]),
+    read= '|'.join([re.escape(x) for x in read]),
+    sample_filename= '|'.join([re.escape(x) for x in sample_filename]),
+
+
+####################
+###### Rules #######
+####################
+
+include: "rules/01_qc.smk"
+include: "rules/02_trim.smk"
+include: "rules/03_alignment.smk"
+include: "rules/04_bam_prep.smk"
+include: "rules/05_bam_qc.smk"
+include: "rules/06_variant_calling.smk"
+# include: "rules/07_annotation.smk"
+
+rule all:
+    input:
+        expand(rules.collect_all_qc.output.all_qc, sample=sample_filename),
+        expand(rules.unified_genotyper_filter_snp.output.snp_filtered_vcf, sample=sample_filename),
+        expand(rules.unified_genotyper_filter_indel.output.indel_filtered_vcf, sample=sample_filename),
+        expand(rules.haplotype_filter_snp.output.filtered_snp_vcf, sample=sample_filename),
+        expand(rules.haplotype_filter_indel.output.filtered_indel_vcf, sample=sample_filename),
+        # expand(rules.tableize_vep_vcf.output.vep_vcf, sample=sample_filename, caller=caller, variant_type=variant_type),

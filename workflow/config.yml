@@ -1,0 +1,48 @@
+# Global variables
+threads_high: 11
+threads_mid: 4
+threads_low: 1
+benchmark: 1
+
+# Directories
+inputdir: "/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking"
+outdir: "/mnt/omar/pipelines/icc/old_pipeline/analysis"
+
+# GRCh37 Reference file
+reference_genome: "/mnt/omar/pipelines/icc/old_pipeline/refs/UCSChg19/allchrom.Chr1ToChrM.validated.fa"
+
+# GRCh37 Target files
+icc_panel: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/ICC_169Genes_Nextera_V4_ProteinCodingExons_overHang40bp.mergeBed.bed"
+cds_panel: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/ICC_169Genes_Nextera_V4_ProteinCodingExons.mergeBed.bed"
+canontran_panel: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/ICC_169Genes_Nextera_V4_ProteinCoding_CanonicalTrans.mergeBed.bed"
+
+# GRCh37 Known variants
+dbsnp: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/hg19_dbSNP138.vcf"
+omni: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/1000G_omni2.5.hg19.vcf"
+tenk: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/1000G_phase1.snps.high_confidence.hg19.vcf"
+tenk_indel: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/1000G_phase1.indels.hg19.vcf"
+hapmap: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/hapmap_3.3.hg19.vcf"
+mills: "/mnt/omar/pipelines/icc/pipeline/ref/grch37/Mills_and_1000G_gold_standard.indels.hg19.vcf"
+
+# Tool paths
+bwa: "/mnt/omar/pipelines/icc/old_pipeline/workflow/software/bwa-0.7.10/bwa"
+samtools: "/mnt/omar/pipelines/icc/old_pipeline/workflow/software/samtools-0.2.0-rc12/samtools"
+bedtools: "/mnt/omar/pipelines/icc/old_pipeline/workflow/software/BEDTools-Version-2.11.2/bin"
+gatk: "/mnt/omar/pipelines/icc/old_pipeline/workflow/software/GenomeAnalysisTK/GenomeAnalysisTK.jar"
+picard: "/mnt/omar/pipelines/icc/old_pipeline/workflow/software/picard-tools-1.117"
+
+# Tool-specific parameters
+gatk_params:
+  AddOrReplaceReadGroups:
+    RGID: "1"
+    RGLB: "lib1"
+    RGPL: "illumina"
+    RGPU: "unit1"
+    RGSM: "20"
+    RGCN: "Broad"
+    RGDS: "ICC"
+    validation_stringency: "SILENT"
+  MarkDuplicates:
+    validation_stringency: "LENIENT"
+  HaplotypeCaller:
+    dcovg: 1000
