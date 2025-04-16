@@ -1,3 +1,6 @@
+import glob
+import os
+
 # Trim reads using prinseq
 rule trimming:
     singularity:
@@ -7,19 +10,22 @@ rule trimming:
     conda: 
         "icc_02_trimming"
     input:
-        fq1=lambda wildcards: config["inputdir"] + "/{sample}_{lane}_R1_001.fastq.gz".format(sample=wildcards.sample, lane=wildcards.lane) 
-            if os.path.exists(config["inputdir"] + "/{sample}_{lane}_R1_001.fastq.gz".format(sample=wildcards.sample, lane=wildcards.lane))
-            else config["inputdir"] + "/{sample}_{lane}_R1_001.fastq".format(sample=wildcards.sample, lane=wildcards.lane),
-        fq2=lambda wildcards: config["inputdir"] + "/{sample}_{lane}_R2_001.fastq.gz".format(sample=wildcards.sample, lane=wildcards.lane)
-            if os.path.exists(config["inputdir"] + "/{sample}_{lane}_R2_001.fastq.gz".format(sample=wildcards.sample, lane=wildcards.lane))
-            else config["inputdir"] + "/{sample}_{lane}_R2_001.fastq".format(sample=wildcards.sample, lane=wildcards.lane)
+        fq1=lambda wildcards: [f for f in glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[0]}/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R1_001.fastq.gz") or 
+                               glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[0]}/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R1_001.fastq") or
+                               glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R1_001.fastq.gz") or
+                               glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R1_001.fastq")][0],
+        fq2=lambda wildcards: [f for f in glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[0]}/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R2_001.fastq.gz") or 
+                               glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[0]}/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R2_001.fastq") or
+                               glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R2_001.fastq.gz") or
+                               glob.glob(config["inputdir"] + f"/{wildcards.sample.split('/')[-1].split('_')[0]}_S*_{wildcards.lane}_R2_001.fastq")][0]
     output:
         fq1=config["outdir"] + "/analysis/002_trimming/{sample}_{lane}_R1.fastq",
         fq1s=config["outdir"] + "/analysis/002_trimming/{sample}_{lane}_R1_singletons.fastq",
         fq2=config["outdir"] + "/analysis/002_trimming/{sample}_{lane}_R2.fastq",
         fq2s=config["outdir"] + "/analysis/002_trimming/{sample}_{lane}_R2_singletons.fastq"
     params:
-        path=config["outdir"] + "/analysis/002_trimming/{sample}_{lane}"
+        path=config["outdir"] + "/analysis/002_trimming/{sample}_{lane}",
+        sample_name=lambda wildcards: wildcards.sample.split("/")[-1]
     log:
         config["outdir"] + "/logs/002_trimming/{sample}/{sample}_{lane}.log"
     benchmark:
@@ -31,15 +37,15 @@ rule trimming:
 
         # Check if input files are gzipped and handle accordingly
         if [[ "{input.fq1}" == *.gz ]]; then
-            gunzip -c {input.fq1} > $(dirname {params.path})/temp/{wildcards.sample}_{wildcards.lane}_R1.fastq
-            FQ1=$(dirname {params.path})/temp/{wildcards.sample}_{wildcards.lane}_R1.fastq
+            gunzip -c {input.fq1} > $(dirname {params.path})/temp/{params.sample_name}_{wildcards.lane}_R1.fastq
+            FQ1=$(dirname {params.path})/temp/{params.sample_name}_{wildcards.lane}_R1.fastq
         else
             FQ1={input.fq1}
         fi
 
         if [[ "{input.fq2}" == *.gz ]]; then
-            gunzip -c {input.fq2} > $(dirname {params.path})/temp/{wildcards.sample}_{wildcards.lane}_R2.fastq
-            FQ2=$(dirname {params.path})/temp/{wildcards.sample}_{wildcards.lane}_R2.fastq
+            gunzip -c {input.fq2} > $(dirname {params.path})/temp/{params.sample_name}_{wildcards.lane}_R2.fastq
+            FQ2=$(dirname {params.path})/temp/{params.sample_name}_{wildcards.lane}_R2.fastq
         else
             FQ2={input.fq2}
         fi

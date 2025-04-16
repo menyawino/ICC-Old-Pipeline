@@ -48,7 +48,7 @@ def get_sample_data(csv_file, input_dir):
             not_found_samples.append(sample)
             continue
             
-        for lane in range(1, 2):  # Loop through lanes 1 to 4
+        for lane in range(1, 5):  # Loop through lanes 1 to 4
             if use_subdirs:
                 # Standard format with sample directories
                 patterns = [
