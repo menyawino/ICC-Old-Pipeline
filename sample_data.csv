@@ -79,3 +79,11 @@ sample,lane,read,file,condition
 20YO06470_S1,L003,R2,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/20YO06470/20YO06470_S5_L001_R2_001.fastq.gz,healthy
 20YO06470_S1,L004,R1,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/20YO06470/20YO06470_S5_L001_R1_001.fastq.gz,healthy
 20YO06470_S1,L004,R2,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/20YO06470/20YO06470_S5_L001_R2_001.fastq.gz,healthy
+54477_S1,L001,R1,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R1_001.fastq.gz,healthy
+54477_S1,L001,R2,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R2_001.fastq.gz,healthy
+54477_S1,L002,R1,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R1_001.fastq.gz,healthy
+54477_S1,L002,R2,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R2_001.fastq.gz,healthy
+54477_S1,L003,R1,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R1_001.fastq.gz,healthy
+54477_S1,L003,R2,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R2_001.fastq.gz,healthy
+54477_S1,L004,R1,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R1_001.fastq.gz,healthy
+54477_S1,L004,R2,/mnt/omar/pipelines/icc/old_pipeline/data/benchmarking/54477/54477_S12_L001_R2_001.fastq.gz,healthy

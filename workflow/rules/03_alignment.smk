@@ -52,7 +52,7 @@ rule convert_bam:
     shell:
         """
         {params.samtools} view \
-        -S -b \
+        -bS \
         -@ {threads} \
         {input.sam} \
         -o {output.bam}.unsorted \

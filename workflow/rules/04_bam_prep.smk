@@ -14,16 +14,17 @@ rule bam_sort:
     benchmark:
         config["outdir"] + "/benchmarks/003_alignment/01_bwa/{sample}_{lane}_bam_sort.txt"
     params:
-        picard=config["picard"]
+        samtools=config["samtools"]
     shell:
         """
-        java -jar \
-        {params.picard}/SortSam.jar \
-        INPUT={input.bam} \
-        OUTPUT={output.bam} \
-        SORT_ORDER=coordinate \
-        CREATE_INDEX=true \
-        VALIDATION_STRINGENCY=SILENT \
+        {params.samtools} sort \
+        -@ {threads} \
+        -o {output.bam} \
+        {input.bam} \
+        2> {log.bam_sort}
+
+        {params.samtools} index \
+        {output.bam} \
         2> {log.bam_sort}
         """
 
@@ -74,7 +75,7 @@ rule mark_duplicates:
     message:
         "Marking duplicates in BAM file for sample {wildcards.sample} on lane {wildcards.lane}"
     input:
-        bam= rules.add_read_groups.output.bam_rg
+        bam=rules.add_read_groups.output.bam_rg
     output:
         bam_md=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}_{lane}.md.bam"
     conda:
@@ -87,16 +88,20 @@ rule mark_duplicates:
         config["outdir"] + "/benchmarks/003_alignment/01_bwa/{sample}_{lane}_markdup.txt"
     params:
         picard=config["picard"],
+        samtools=config["samtools"]
     shell:
         """
         java -jar \
         {params.picard}/MarkDuplicates.jar \
         I={input.bam} \
         O={output.bam_md} \
-        CREATE_INDEX=true \
+        METRICS_FILE={output.bam_md}.metrics.txt \
         VALIDATION_STRINGENCY=SILENT \
-        M={log.picard_markdup} \
         2> {log.picard_markdup}
+
+        {params.samtools} index \
+        {output.bam_md} \
+        2>> {log.picard_markdup}
         """
 
 rule realigner_target_creator:
@@ -213,38 +218,38 @@ rule base_recalibrator:
         2> {log.base_recal}
         """
 
-rule print_reads:
-    message:
-        "Printing reads for sample {wildcards.sample} on lane {wildcards.lane}"
-    input:
-        bam=rules.indel_realigner.output.bam_realigned,
-        recal_table=rules.base_recalibrator.output.recal_table
-    output:
-        bam_recal=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}_{lane}.md.Realigned.recalibrated.bam"
-    conda:
-        "../envs/java.yml"
-    threads:
-        config["threads_high"]
-    log:
-        print_reads=config["outdir"] + "/logs/003_alignment/01_bwa/{sample}_{lane}_print_reads.log"
-    benchmark:
-        config["outdir"] + "/benchmarks/003_alignment/01_bwa/{sample}_{lane}_print_reads.txt"
-    params:
-        gatk=config["gatk"],
-        ref=config["reference_genome"]
-    shell:
-        """
-        java -jar \
-        {params.gatk} \
-        -R {params.ref} \
-        -I {input.bam} \
-        -T PrintReads \
-        -nct {threads} \
-        --out {output.bam_recal} \
-        -BQSR {input.recal_table} \
-        -S LENIENT \
-        2> {log.print_reads}
-        """
+# rule print_reads:
+#     message:
+#         "Printing reads for sample {wildcards.sample} on lane {wildcards.lane}"
+#     input:
+#         bam=rules.indel_realigner.output.bam_realigned,
+#         recal_table=rules.base_recalibrator.output.recal_table
+#     output:
+#         bam_recal=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}_{lane}.md.Realigned.recalibrated.bam"
+#     conda:
+#         "../envs/java.yml"
+#     threads:
+#         config["threads_high"]
+#     log:
+#         print_reads=config["outdir"] + "/logs/003_alignment/01_bwa/{sample}_{lane}_print_reads.log"
+#     benchmark:
+#         config["outdir"] + "/benchmarks/003_alignment/01_bwa/{sample}_{lane}_print_reads.txt"
+#     params:
+#         gatk=config["gatk"],
+#         ref=config["reference_genome"]
+#     shell:
+#         """
+#         java -jar \
+#         {params.gatk} \
+#         -R {params.ref} \
+#         -I {input.bam} \
+#         -T PrintReads \
+#         -nct {threads} \
+#         --out {output.bam_recal} \
+#         -BQSR {input.recal_table} \
+#         -S LENIENT \
+#         2> {log.print_reads}
+#         """
 
 rule table_recalibration:
     message:
@@ -286,10 +291,12 @@ rule merge_samfiles:
     message:
         "Merging BAM files for sample {wildcards.sample}"
     input:
-        l1=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}_L001.bam",
-        # l2=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}_L002.bam",
-        # l3=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}_L003.bam",
-        # l4=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}_L004.bam"
+        lambda wildcards: [f for f in [
+            config["outdir"] + f"/analysis/003_alignment/01_bwa/{wildcards.sample}_L001.bam",
+            config["outdir"] + f"/analysis/003_alignment/01_bwa/{wildcards.sample}_L002.bam",
+            config["outdir"] + f"/analysis/003_alignment/01_bwa/{wildcards.sample}_L003.bam",
+            config["outdir"] + f"/analysis/003_alignment/01_bwa/{wildcards.sample}_L004.bam"
+        ] if os.path.exists(f)]
     output:
         merged_bam=config["outdir"] + "/analysis/003_alignment/01_bwa/{sample}.bam"
     conda:
@@ -306,7 +313,7 @@ rule merge_samfiles:
         """
         java -jar \
         {params.picard}/MergeSamFiles.jar \
-        INPUT={input.l1} \
+        {(' '.join(['INPUT=' + f for f in input]))} \
         OUTPUT={output.merged_bam} \
         CREATE_INDEX=TRUE \
         VALIDATION_STRINGENCY=SILENT \

@@ -342,6 +342,7 @@ rule haplotype_filter_indel:
         --downsampling_type BY_SAMPLE \
         --variant {input.indel_vcf} \
         -o {output.filtered_indel_vcf} \
+        -baq CALCULATE_AS_NECESSARY \
         --filterExpression "QD < 2.0" \
         --filterExpression "ReadPosRankSum < -20.0" \
         --filterExpression "FS > 200.0" \

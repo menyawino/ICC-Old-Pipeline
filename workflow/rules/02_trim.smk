@@ -50,15 +50,14 @@ rule trimming:
             FQ2={input.fq2}
         fi
 
-        prinseq-lite.pl \\
-        -fastq $FQ1 \\
-        -fastq2 $FQ2 \\
-        -out_good {params.path} \\
-        -out_bad null \\
-        -trim_qual_right 20 \\
-        -trim_qual_left 20 \\
-        -trim_qual_window 5 \\
-        -min_len 35 \\
+        prinseq-lite.pl \
+        -fastq $FQ1 \
+        -fastq2 $FQ2 \
+        -out_good {params.path} \
+        -trim_qual_right 20 \
+        -trim_qual_left 20 \
+        -trim_qual_window 5 \
+        -min_len 35 \
         &> {log}
 
         # rename output files to suit the rest of the pipeline
